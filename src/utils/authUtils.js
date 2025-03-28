@@ -1,38 +1,60 @@
-// Create a new file for auth utilities
+// src/utils/authUtils.js
+
 export const validateToken = () => {
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-      return {
-        isValid: false,
-        error: 'No token found'
-      };
-    }
+  const token = localStorage.getItem('token');
+  const tokenTimestamp = localStorage.getItem('tokenTimestamp');
   
-    try {
-      // Add token validation logic here
-      // For example, you could check token format, expiration, etc.
-      
-      // Simple token format validation (example)
-      if (typeof token !== 'string' || token.length < 10) {
-        throw new Error('Invalid token format');
+  if (!token) {
+    return {
+      isValid: false,
+      error: 'No token found'
+    };
+  }
+
+  try {
+    // Token format validation
+    if (typeof token !== 'string' || token.length < 10) {
+      throw new Error('Invalid token format');
+    }
+
+    // Token expiration check (24 hours)
+    if (tokenTimestamp) {
+      const now = Date.now();
+      const tokenAge = now - parseInt(tokenTimestamp);
+      const tokenMaxAge = 24 * 60 * 60 * 1000; // 24 hours
+
+      if (tokenAge > tokenMaxAge) {
+        throw new Error('Token expired');
       }
-  
-      // You could also add API call to validate token with backend
-      // const response = await fetch('https://reqres.in/api/validate-token', {
-      //   headers: { 'Authorization': `Bearer ${token}` }
-      // });
-      // if (!response.ok) throw new Error('Invalid token');
-  
-      return {
-        isValid: true,
-        token
-      };
-    } catch (error) {
-      localStorage.removeItem('token'); // Clear invalid token
-      return {
-        isValid: false,
-        error: error.message
-      };
     }
-  };
+
+    return {
+      isValid: true,
+      token
+    };
+  } catch (error) {
+    // Clear invalid token
+    localStorage.removeItem('token');
+    localStorage.removeItem('tokenTimestamp');
+    
+    return {
+      isValid: false,
+      error: error.message
+    };
+  }
+};
+
+// Helper functions
+export const authUtils = {
+  getToken: () => localStorage.getItem('token'),
+  
+  clearToken: () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('tokenTimestamp');
+  },
+  
+  setToken: (token) => {
+    localStorage.setItem('token', token);
+    localStorage.setItem('tokenTimestamp', Date.now().toString());
+  }
+};

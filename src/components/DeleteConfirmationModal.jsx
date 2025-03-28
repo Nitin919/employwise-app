@@ -1,8 +1,27 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, AlertCircle } from 'lucide-react';
+import PropTypes from 'prop-types';
 
-export function DeleteConfirmationModal({ isOpen, onClose, onConfirm, userName }) {
+export function DeleteConfirmationModal({ 
+  isOpen, 
+  onClose, 
+  onConfirm, 
+  userName = 'this user',
+  isDeleting = false 
+}) {
+  // Handle Escape key
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
@@ -22,7 +41,7 @@ export function DeleteConfirmationModal({ isOpen, onClose, onConfirm, userName }
           className="bg-white rounded-xl shadow-xl p-6 m-4 max-w-sm w-full"
         >
           <div className="flex items-center space-x-3 text-red-600 mb-4">
-            <AlertCircle size={24} />
+            <AlertCircle className="animate-pulse" size={24} />
             <h3 className="text-lg font-semibold">Confirm Delete</h3>
           </div>
           
@@ -35,7 +54,8 @@ export function DeleteConfirmationModal({ isOpen, onClose, onConfirm, userName }
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              disabled={isDeleting}
+              className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
             >
               Cancel
             </motion.button>
@@ -43,10 +63,20 @@ export function DeleteConfirmationModal({ isOpen, onClose, onConfirm, userName }
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onConfirm}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2"
+              disabled={isDeleting}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2 disabled:opacity-50"
             >
-              <Trash2 size={16} />
-              <span>Delete</span>
+              {isDeleting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                  <span>Deleting...</span>
+                </>
+              ) : (
+                <>
+                  <Trash2 size={16} />
+                  <span>Delete</span>
+                </>
+              )}
             </motion.button>
           </div>
         </motion.div>
@@ -54,3 +84,13 @@ export function DeleteConfirmationModal({ isOpen, onClose, onConfirm, userName }
     </AnimatePresence>
   );
 }
+
+DeleteConfirmationModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onConfirm: PropTypes.func.isRequired,
+  userName: PropTypes.string,
+  isDeleting: PropTypes.bool
+};
+
+export default DeleteConfirmationModal;

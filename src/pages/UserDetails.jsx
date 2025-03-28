@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { ArrowLeft } from 'lucide-react';
 import { ProfileCard } from '../components/ProfileCard';
 import { TabSection } from '../components/TabSection';
-import { DeleteModal } from '../components/DeleteModel';
+import { DeleteConfirmationModal } from '../components/DeleteConfirmationModal';
 
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -195,7 +195,7 @@ function UserDetails() {
         </motion.div>
       </motion.main>
 
-      <DeleteModal 
+      <DeleteConfirmationModal 
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}

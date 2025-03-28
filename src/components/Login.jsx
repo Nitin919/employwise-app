@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { Loader } from 'lucide-react';
+import { validateToken } from '../utils/authUtils';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -10,8 +11,33 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Check if user is already logged in
+  useEffect(() => {
+    const { isValid } = validateToken();
+    if (isValid) {
+      navigate('/users');
+    }
+  }, [navigate]);
+
+  // Basic email validation
+  const isValidEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Form validation
+    if (!isValidEmail(email)) {
+      toast.error('Please enter a valid email');
+      return;
+    }
+
+    if (password.length < 3) {
+      toast.error('Password is too short');
+      return;
+    }
+
     setIsLoading(true);
     const loadingToast = toast.loading('Logging in...');
 
@@ -25,11 +51,7 @@ function Login() {
       const data = await res.json();
 
       if (res.ok && data.token) {
-   
-        const tokenData = {
-          token: data.token,
-          timestamp: Date.now()
-        };
+        // Store token and timestamp
         localStorage.setItem('token', data.token);
         localStorage.setItem('tokenTimestamp', Date.now().toString());
         
@@ -52,9 +74,13 @@ function Login() {
         animate={{ opacity: 1, y: 0 }}
         className="bg-white p-8 rounded-xl shadow-xl max-w-md w-full"
       >
-        <h1 className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        <motion.h1 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+        >
           EmployWise Login
-        </h1>
+        </motion.h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -69,6 +95,7 @@ function Login() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
               placeholder="eve.holt@reqres.in"
               disabled={isLoading}
+              autoComplete="email"
             />
           </div>
 
@@ -84,6 +111,7 @@ function Login() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
               placeholder="cityslicka"
               disabled={isLoading}
+              autoComplete="current-password"
             />
           </div>
 
@@ -103,6 +131,11 @@ function Login() {
               <span>Login</span>
             )}
           </motion.button>
+
+          {/* Optional: Add demo credentials */}
+          <p className="text-sm text-gray-500 text-center mt-4">
+            Demo: eve.holt@reqres.in / cityslicka
+          </p>
         </form>
       </motion.div>
     </div>

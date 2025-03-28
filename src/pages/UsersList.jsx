@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { UserCard } from '../components/UserCard';
-import { EditUserModal } from '../components/EditUserModeal';
+import { EditUserModal } from '../components/EditUserModal';
 import { DeleteConfirmationModal } from '../components/DeleteConfirmationModal';
 import { useTokenValidation } from '../hooks/useTokenValidation';
 import { Loader, Search, Filter, Download, UserPlus } from 'lucide-react';
@@ -36,7 +36,7 @@ function UsersList() {
       return;
     }
     fetchUsers(page);
-  }, [page]);
+  }, [page,checkTokenValidity]);
 
   const fetchUsers = async (pageNum) => {
     setIsLoading(true);
